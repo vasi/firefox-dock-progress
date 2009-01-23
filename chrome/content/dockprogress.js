@@ -7,12 +7,9 @@ var dockProgress = {
       .getService(this.iface);
     this.dlMgr.addListener(this);
     
-    window.dump("foo!");
-    var dockProgress = Components.classes[
+    this.dockProgress = Components.classes[
         "@vasi.dyndns.org/DockProgress/DockProgress;1"
       ].getService(Components.interfaces.IDockProgress);
-    dockProgress.SetProgress(123.45);
-    window.dump("bar!");
   },
   
   update: function(meth) {
@@ -29,9 +26,11 @@ var dockProgress = {
       cur += dl.amountTransferred;
     }
     
-    if (total > 0) {
+    if (total == 0) {
+      this.dockProgress.SetHidden();
+    } else {
       var pct = 100.0 * cur / total;
-      window.dump("Download progress: " + pct + "% (" + meth + ")");
+      this.dockProgress.SetProgress(pct);
     }
   },
   

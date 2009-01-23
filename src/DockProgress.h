@@ -1,6 +1,8 @@
 #ifndef _DOCK_PROGRESS_H_
 #define _DOCK_PROGRESS_H_
 
+#import <Cocoa/Cocoa.h>
+
 #include "IDockProgress.h"
 
 #define DOCK_PROGRESS_CONTRACTID "@vasi.dyndns.org/DockProgress/DockProgress;1"
@@ -16,12 +18,16 @@ public:
   NS_DECL_IDOCKPROGRESS
 
   DockProgress();
-
+  
 private:
   ~DockProgress();
 
 protected:
-  /* additional members */
+  void UpdateDockIcon();
+  void DrawProgressBar(NSImage *img, double height, double progress);
+  
+  bool mHidden;
+  double mProgress;
 };
 
 #endif
