@@ -1,0 +1,5 @@
+components
+*.xpt
+*.o
+*.dylib
+src/IDockProgress.h
