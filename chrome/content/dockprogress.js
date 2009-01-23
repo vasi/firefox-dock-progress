@@ -1,12 +1,31 @@
 var dockProgress = {
   setup: function() {
+    this.Ci = Components.interfaces;
+    this.iface = this.Ci.nsIDownloadManager;
+    
     this.dlMgr = Components.classes["@mozilla.org/download-manager;1"]
-      .getService(Components.interfaces.nsIDownloadManager);
+      .getService(this.iface);
     this.dlMgr.addListener(this);
   },
   
   update: function(meth) {
-    window.dump("download state change! " + meth);
+    var total = 0, cur = 0;
+    
+    var dls = this.dlMgr.activeDownloads;
+    while (dls.hasMoreElements()) {
+      var dl = dls.getNext().QueryInterface(this.Ci.nsIDownload);
+      if (dl.state != this.iface.DOWNLOAD_DOWNLOADING ||
+            dl.percentComplete == -1 /* indeterminate */)
+          continue;
+      
+      total += dl.size;
+      cur += dl.amountTransferred;
+    }
+    
+    if (total > 0) {
+      var pct = 100.0 * cur / total;
+      window.dump("Download progress: " + pct + "% (" + meth + ")");
+    }
   },
   
   onDownloadStateChange: function(state, dl) { this.update("DL state") },
