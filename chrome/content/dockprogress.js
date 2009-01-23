@@ -6,6 +6,13 @@ var dockProgress = {
     this.dlMgr = Components.classes["@mozilla.org/download-manager;1"]
       .getService(this.iface);
     this.dlMgr.addListener(this);
+    
+    window.dump("foo!");
+    var dockProgress = Components.classes[
+        "@vasi.dyndns.org/DockProgress/DockProgress;1"
+      ].getService(Components.interfaces.IDockProgress);
+    dockProgress.SetProgress(123.45);
+    window.dump("bar!");
   },
   
   update: function(meth) {

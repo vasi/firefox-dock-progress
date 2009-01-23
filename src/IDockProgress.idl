@@ -1,0 +1,8 @@
+#include "nsISupports.idl"
+
+[scriptable, uuid(3146FBBB-CBDF-4A0F-BC00-00CAD2C75E58)]
+interface IDockProgress : nsISupports
+{
+  void SetHidden();
+  void SetProgress(in double percent);
+};
