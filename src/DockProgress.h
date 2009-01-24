@@ -24,6 +24,10 @@ private:
 
 protected:
   void UpdateDockIcon();
+  
+  void ProgressBarIcon(NSImage *img);
+  void FilledIcon(NSImage *img);
+
   void DrawProgressBar(NSImage *img, double height, double progress);
   NSString *COMToCocoaString(const nsACString & str);
   

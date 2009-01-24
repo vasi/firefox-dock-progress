@@ -18,4 +18,5 @@ Todo
 * Test on 10.4, PPC
 * Installation, addons.mozilla.org
 * Multiple progress bars
-* Filling-up-icon view
+* UI for choosing display type
+* Throttle drawing?

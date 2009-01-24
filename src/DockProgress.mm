@@ -41,10 +41,28 @@ void DockProgress::UpdateDockIcon()
 	NSImage *dockIcon = [appIcon copyWithZone: nil];
 	if (!mHidden) {
 		[dockIcon lockFocus];
-		DrawProgressBar(dockIcon, ProgressBarHeightInIcon, mProgress);
+		FilledIcon(dockIcon);
+		//ProgressBarIcon(dockIcon);
 		[dockIcon unlockFocus];
 	}
 	[NSApp setApplicationIconImage: dockIcon];
+}
+
+void DockProgress::ProgressBarIcon(NSImage *img)
+{
+	DrawProgressBar(img, ProgressBarHeightInIcon, mProgress);
+}
+
+void DockProgress::FilledIcon(NSImage *img)
+{
+	NSSize sz = [img size];
+	double h = sz.height * mProgress / 100;
+	NSRect r = NSMakeRect(0, h, sz.width, sz.height - h);
+	
+	[[NSColor colorWithCalibratedWhite: 1.0 alpha: 0.7] set];
+	[[NSGraphicsContext currentContext]
+		setCompositingOperation: NSCompositeSourceAtop];
+	[NSBezierPath fillRect: r];
 }
 
 void DockProgress::DrawProgressBar(NSImage *img, double height, double progress)
