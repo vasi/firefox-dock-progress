@@ -9,7 +9,8 @@ NS_IMPL_ISUPPORTS1(DockProgress, IDockProgress)
 static const double ProgressBarHeight = 6.0/32;
 static const double ProgressBarHeightInIcon = 8.0/32;
 
-DockProgress::DockProgress() : mHidden(true), mProgress(0.0), mGradient(nil)
+DockProgress::DockProgress() : mHidden(true), mProgress(0.0), mGradient(nil),
+	mStyle(IDockProgress::STYLE_BAR)
 {
 }
 
@@ -51,8 +52,12 @@ void DockProgress::UpdateDockIcon()
 	NSImage *dockIcon = [appIcon copyWithZone: nil];
 	if (!mHidden) {
 		[dockIcon lockFocus];
-		FilledIcon(dockIcon);
-		//ProgressBarIcon(dockIcon);
+		switch (mStyle) {
+			case IDockProgress::STYLE_BAR:
+				ProgressBarIcon(dockIcon); break;
+			case IDockProgress::STYLE_FILL:
+				FilledIcon(dockIcon); break;
+		}
 		[dockIcon unlockFocus];
 	}
 	WriteImage(dockIcon);
@@ -80,7 +85,7 @@ void DockProgress::DrawProgressBar(NSImage *img, double height, double progress)
 {
 	NSSize s = [img size];
 	NSRect bar = NSMakeRect(0, s.height * (height - ProgressBarHeight / 2),
-		s.width, s.height * ProgressBarHeight); 
+		s.width - 1, s.height * ProgressBarHeight);
 	
 	[[NSColor whiteColor] set];
 	[NSBezierPath fillRect: bar];
@@ -108,4 +113,11 @@ NS_IMETHODIMP DockProgress::SetGradientPath(const nsACString & path)
 	mGradient = [[NSImage alloc] initByReferencingFile: cPath];
 	
 	return NS_OK;
+}
+
+/* void SetStyle (in long style); */
+NS_IMETHODIMP DockProgress::SetStyle(PRInt32 style)
+{
+	mStyle = style;
+    return NS_OK;
 }

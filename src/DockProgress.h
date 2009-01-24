@@ -34,6 +34,7 @@ protected:
   bool mHidden;
   double mProgress;
   NSImage *mGradient;
+  PRInt32 mStyle;
 };
 
 #endif

@@ -12,14 +12,36 @@ var dockProgress = {
       .getService(this.Ci.IDockProgress);
     
     this.findGradient();
+    this.monitorPrefs();
+  },
+  
+  monitorPrefs : function() {
+    this.prefs = this.Cc["@mozilla.org/preferences-service;1"]
+      .getService(this.Ci.nsIPrefService)
+      .getBranch("dockprogress.");
+    this.prefs.QueryInterface(this.Ci.nsIPrefBranch2);
+    this.prefs.addObserver("", this, false);
+    
+    this.updateStyle();
+  },
+  
+  observe: function(subject, topic, data) {
+    if (topic == "nsPref:changed" && data == "progressStyle")
+      this.updateStyle();
+  },
+  
+  updateStyle: function() {
+    var style = this.prefs.getIntPref("progressStyle");
+    this.dockProgress.SetStyle(style);
   },
   
   findGradient: function() {
     var extMgr = this.Cc["@mozilla.org/extensions/manager;1"]
       .getService(this.Ci.nsIExtensionManager);
-    var extID = "dockdownloadprogressbar@vasi.dyndns.org";
+    var extID = "dockprogress@vasi.dyndns.org";
     var instLoc = extMgr.getInstallLocation(extID);
-    var file = instLoc.getItemFile(extID, "images/MiniProgressGradient.png");
+    var file = instLoc.getItemFile(extID,
+      "chrome/content/MiniProgressGradient.png");
     this.dockProgress.SetGradientPath(file.path);
   },
   
