@@ -8,7 +8,7 @@ int main(void) {
 	
 	NSImage *gradient = [[NSImage alloc]
 		initByReferencingFile: @"images/MiniProgressGradient.png"];
-	NSRect bar = NSMakeRect(0, 20, 127, 24);
+	NSRect bar = NSMakeRect(2, 20, 124, 32);
 	
 	[img lockFocus];
 	
@@ -23,6 +23,7 @@ int main(void) {
 		fraction: 1.0];
 	
 	[[NSColor blackColor] set];
+	[NSBezierPath setDefaultLineWidth: 3];
 	[NSBezierPath strokeRect: bar];
 	
 	[img unlockFocus];
