@@ -35,6 +35,16 @@ NS_IMETHODIMP DockProgress::SetProgress(double percent)
     return NS_OK;
 }
 
+static void WriteImage(NSImage *img)
+{
+	NSString *path = [NSString stringWithFormat:
+		@"/tmp/firefox-dock-progress.%d.png", time(NULL)];
+	NSBitmapImageRep *rep = [NSBitmapImageRep imageRepWithData:
+		[img TIFFRepresentation]];
+	NSData *data = [rep representationUsingType: NSPNGFileType properties: nil];
+	[data writeToFile: path atomically: true];
+}
+
 void DockProgress::UpdateDockIcon()
 {
 	NSImage *appIcon = [NSImage imageNamed: @"NSApplicationIcon"];
@@ -45,6 +55,7 @@ void DockProgress::UpdateDockIcon()
 		//ProgressBarIcon(dockIcon);
 		[dockIcon unlockFocus];
 	}
+	WriteImage(dockIcon);
 	[NSApp setApplicationIconImage: dockIcon];
 }
 
