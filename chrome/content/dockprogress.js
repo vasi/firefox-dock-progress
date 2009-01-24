@@ -17,7 +17,7 @@ var dockProgress = {
   findGradient: function() {
     var extMgr = this.Cc["@mozilla.org/extensions/manager;1"]
       .getService(this.Ci.nsIExtensionManager);
-    var extID = "dockdownloadprogressbar@vasi.dyndns.org";
+    var extID = "dockprogress@vasi.dyndns.org";
     var instLoc = extMgr.getInstallLocation(extID);
     var file = instLoc.getItemFile(extID, "images/MiniProgressGradient.png");
     this.dockProgress.SetGradientPath(file.path);

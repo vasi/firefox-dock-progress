@@ -4,7 +4,7 @@
      xmlns:em="http://www.mozilla.org/2004/em-rdf#">
 
   <Description about="urn:mozilla:install-manifest">
-    <em:id>dockdownloadprogressbar@vasi.dyndns.org</em:id>
+    <em:id>dockprogress@vasi.dyndns.org</em:id>
     <em:version>1.0</em:version>
     <em:type>2</em:type>
    
@@ -19,9 +19,11 @@
     </em:targetApplication>
    
     <!-- Front End MetaData -->
-    <em:name>Dock Download Progress Bar</em:name>
+    <em:name>Dock Progress</em:name>
     <em:description>Display the progress of downloads in the Mac OS X Dock</em:description>
     <em:creator>Dave Vasilevsky</em:creator>
-    <em:homepageURL>http://vasi.dyndns.org</em:homepageURL>
+	<em:homepageURL>http://github.com/vasi/firefox-dock-progress/tree/master</em:homepageURL>
+    <em:optionsURL>chrome://dockprogress/content/prefs.xul</em:optionsURL>
+    <em:iconURL>chrome://dockprogress/content/icon.png</em:iconURL>
   </Description>      
 </RDF>
