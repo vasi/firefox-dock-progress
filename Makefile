@@ -13,4 +13,7 @@ clean:
 	$(MAKE) -C src clean
 	rm -rf components
 
-.PHONY: all native universal clean %.dylib
+idl:
+	$(MAKE) -C src $@
+
+.PHONY: all native universal clean %.dylib idl

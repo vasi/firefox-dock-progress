@@ -1,14 +1,15 @@
-#include "DockProgress.h"
+#import "DockProgress.h"
 
+#include "nsStringAPI.h"
 
 /* Implementation file */
 NS_IMPL_ISUPPORTS1(DockProgress, IDockProgress)
 
 
-static const double ProgressBarHeight = 3.0/16;
-static const double ProgressBarHeightInIcon = 3.0/16;
+static const double ProgressBarHeight = 6.0/32;
+static const double ProgressBarHeightInIcon = 8.0/32;
 
-DockProgress::DockProgress() : mHidden(true), mProgress(0.0)
+DockProgress::DockProgress() : mHidden(true), mProgress(0.0), mGradient(nil)
 {
 }
 
@@ -37,7 +38,7 @@ NS_IMETHODIMP DockProgress::SetProgress(double percent)
 void DockProgress::UpdateDockIcon()
 {
 	NSImage *appIcon = [NSImage imageNamed: @"NSApplicationIcon"];
-	NSImage *dockIcon = [appIcon copyWithZone: NULL];
+	NSImage *dockIcon = [appIcon copyWithZone: nil];
 	if (!mHidden) {
 		[dockIcon lockFocus];
 		DrawProgressBar(dockIcon, ProgressBarHeightInIcon, mProgress);
@@ -57,9 +58,26 @@ void DockProgress::DrawProgressBar(NSImage *img, double height, double progress)
 	
 	NSRect done = bar;
 	done.size.width *= progress / 100;
-	[[NSColor blueColor] set];
-	[NSBezierPath fillRect: done];
+	NSRect gradRect = NSZeroRect;
+	gradRect.size = [mGradient size];
+	[mGradient drawInRect: done fromRect: gradRect operation: NSCompositeCopy
+		fraction: 1.0];
 	
 	[[NSColor blackColor] set];
 	[NSBezierPath strokeRect: bar];
+}
+
+NSString *DockProgress::COMToCocoaString(const nsACString & str)
+{
+	return [NSString stringWithUTF8String: str.BeginReading()];
+}
+
+/* void SetGradientPath (in AUTF8String path); */
+NS_IMETHODIMP DockProgress::SetGradientPath(const nsACString & path)
+{
+	NSString *cPath = COMToCocoaString(path);
+	NSLog(@"gradient path: %@", cPath);
+	mGradient = [[NSImage alloc] initByReferencingFile: cPath];
+	
+	return NS_OK;
 }

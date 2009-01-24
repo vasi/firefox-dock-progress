@@ -1,15 +1,27 @@
 var dockProgress = {
   setup: function() {
+    this.Cc = Components.classes;
     this.Ci = Components.interfaces;
-    this.iface = this.Ci.nsIDownloadManager;
+    this.IDLM = this.Ci.nsIDownloadManager;
     
-    this.dlMgr = Components.classes["@mozilla.org/download-manager;1"]
-      .getService(this.iface);
+    this.dlMgr = this.Cc["@mozilla.org/download-manager;1"]
+      .getService(this.IDLM);
     this.dlMgr.addListener(this);
     
-    this.dockProgress = Components.classes[
-        "@vasi.dyndns.org/DockProgress/DockProgress;1"
-      ].getService(Components.interfaces.IDockProgress);
+    this.dockProgress = this.Cc["@vasi.dyndns.org/DockProgress/DockProgress;1"]
+      .getService(this.Ci.IDockProgress);
+    
+    this.findGradient();
+  },
+  
+  findGradient: function() {
+    var extMgr = this.Cc["@mozilla.org/extensions/manager;1"]
+      .getService(this.Ci.nsIExtensionManager);
+    var extID = "dockdownloadprogressbar@vasi.dyndns.org";
+    var instLoc = extMgr.getInstallLocation(extID);
+    var file = instLoc.getItemFile(extID, "images/MiniProgressGradient.png");
+    dump(file.path);
+    this.dockProgress.SetGradientPath(file.path);
   },
   
   update: function(meth) {
@@ -18,7 +30,7 @@ var dockProgress = {
     var dls = this.dlMgr.activeDownloads;
     while (dls.hasMoreElements()) {
       var dl = dls.getNext().QueryInterface(this.Ci.nsIDownload);
-      if (dl.state != this.iface.DOWNLOAD_DOWNLOADING ||
+      if (dl.state != this.IDLM.DOWNLOAD_DOWNLOADING ||
             dl.percentComplete == -1 /* indeterminate */)
           continue;
       

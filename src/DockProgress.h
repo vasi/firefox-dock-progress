@@ -25,9 +25,11 @@ private:
 protected:
   void UpdateDockIcon();
   void DrawProgressBar(NSImage *img, double height, double progress);
+  NSString *COMToCocoaString(const nsACString & str);
   
   bool mHidden;
   double mProgress;
+  NSImage *mGradient;
 };
 
 #endif

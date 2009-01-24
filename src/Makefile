@@ -16,8 +16,8 @@ IDL_INCLUDES = $(MOZILLA_SDK)/idl
 XPIDL = env DYLD_FALLBACK_LIBRARY_PATH=$(EXTRA_LIBS) $(MOZILLA_SDK)/bin/xpidl \
 	-I$(IDL_INCLUDES)
 
-OPT = -g
-#OPT = -Os
+#OPT = -g
+OPT = -Os
 CXX = g++ -Wall -Wno-non-virtual-dtor $(OPT) $(ARCH_FLAG) \
 	-fno-rtti -fno-exceptions -fPIC -fno-strict-aliasing -fpascal-strings \
 	-fno-common -fshort-wchar

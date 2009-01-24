@@ -5,4 +5,5 @@ interface IDockProgress : nsISupports
 {
   void SetHidden();
   void SetProgress(in double percent);
+  void SetGradientPath(in AUTF8String path);
 };
