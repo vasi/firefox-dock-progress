@@ -9,14 +9,13 @@ bbtype="text/css"?>
  
 <prefpane id="dockprogress-pane" label="Style">
   <preferences>
-    <preference id="pref_style" name="dockprogress.progressStyle" type="int"/>
+    <preference id="pref-style" name="dockprogress.progressStyle" type="int"/>
   </preferences>
- 
-  <radiogroup preference="pref_style">
-	<radio id="bar" label="Progress bar" value="0"
-	  image="chrome://dockprogress/content/styleBar.png"/>
+  
+  <radiogroup id="style-group" preference="pref-style">
+	<radio id="bar" label="Progress bar" value="0"/>
 	<radio id="fill" label="Icon fill" value="1"/>
   </radiogroup>
 </prefpane>
- 
+
 </prefwindow>

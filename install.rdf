@@ -20,7 +20,8 @@
    
     <!-- Front End MetaData -->
     <em:name>Dock Progress</em:name>
-    <em:description>Display the progress of downloads in the Mac OS X Dock</em:description>
+    <em:description>Displays the progress of downloads in the
+      Mac OS X dock</em:description>
     <em:creator>Dave Vasilevsky</em:creator>
 	<em:homepageURL>http://github.com/vasi/firefox-dock-progress/tree/master</em:homepageURL>
     <em:optionsURL>chrome://dockprogress/content/prefs.xul</em:optionsURL>

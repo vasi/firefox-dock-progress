@@ -1,3 +1,21 @@
 prefwindow {
 	min-width: 200px;
 }
+
+#style-group radio {
+	text-indent: .5em;
+}
+
+radio#bar {
+	list-style-image: url("chrome://dockprogress/content/styleBar.png");
+}
+
+radio#fill {
+	list-style-image: url("chrome://dockprogress/content/styleFill.png");
+}
+
+#style-group .radio-icon {
+	width: 64px;
+	height: 64px;
+	margin-left: .5em;
+}
