@@ -69,7 +69,7 @@ void DockProgress::DrawProgressBar(NSImage *img, double height, double progress)
 {
 	NSSize s = [img size];
 	NSRect bar = NSMakeRect(0, s.height * (height - ProgressBarHeight / 2),
-		s.width, s.height * ProgressBarHeight); 
+		s.width - 1, s.height * ProgressBarHeight);
 	
 	[[NSColor whiteColor] set];
 	[NSBezierPath fillRect: bar];
