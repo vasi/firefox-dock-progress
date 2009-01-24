@@ -16,7 +16,8 @@ Todo
 ----
 
 * Test on 10.4, PPC
-* Installation, addons.mozilla.org
+* addons.mozilla.org
 * Multiple progress bars
 * UI for choosing display type
 * Throttle drawing?
+* Enforce platform specific?

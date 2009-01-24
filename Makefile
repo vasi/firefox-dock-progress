@@ -1,3 +1,7 @@
+VERSION = $(shell perl -ne 'print $$1 if m,<em:version>(.*)</em:version>,' \
+	install.rdf)
+XPI = DockProgress-$(VERSION).xpi
+
 all: universal
 
 native: DockProgress.dylib
@@ -11,9 +15,14 @@ universal: DockProgress-universal.dylib
 
 clean:
 	$(MAKE) -C src clean
-	rm -rf components
+	rm -rf components *.xpi
 
 idl:
 	$(MAKE) -C src $@
 
-.PHONY: all native universal clean %.dylib idl
+xpi: universal
+	rm -f $(XPI)
+	zip $(XPI) -r chrome chrome.manifest components images install.rdf \
+		-x '*/.DS_Store'
+
+.PHONY: all native universal clean %.dylib idl xpi

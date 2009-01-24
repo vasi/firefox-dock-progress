@@ -3,3 +3,4 @@ components
 *.o
 *.dylib
 src/IDockProgress.h
+*.xpi
