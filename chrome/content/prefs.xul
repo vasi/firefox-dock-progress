@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://global/skin/global.css" type="text/css"?>
+<?xml-stylesheet href="chrome://dockprogress/content/prefs.css"
+bbtype="text/css"?>
+ 
+<prefwindow id="dockprogress-prefs"
+  title="Dock Progress Options"
+  xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+ 
+<prefpane id="dockprogress-pane" label="Style">
+  <preferences>
+    <preference id="pref_style" name="dockprogress.progressStyle" type="int"/>
+  </preferences>
+ 
+  <radiogroup preference="pref_style">
+	<radio id="bar" label="Progress bar" value="0"
+	  image="chrome://dockprogress/content/styleBar.png"/>
+	<radio id="fill" label="Icon fill" value="1"/>
+  </radiogroup>
+</prefpane>
+ 
+</prefwindow>
