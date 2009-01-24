@@ -76,7 +76,6 @@ NSString *DockProgress::COMToCocoaString(const nsACString & str)
 NS_IMETHODIMP DockProgress::SetGradientPath(const nsACString & path)
 {
 	NSString *cPath = COMToCocoaString(path);
-	NSLog(@"gradient path: %@", cPath);
 	mGradient = [[NSImage alloc] initByReferencingFile: cPath];
 	
 	return NS_OK;

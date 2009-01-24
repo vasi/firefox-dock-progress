@@ -20,7 +20,6 @@ var dockProgress = {
     var extID = "dockdownloadprogressbar@vasi.dyndns.org";
     var instLoc = extMgr.getInstallLocation(extID);
     var file = instLoc.getItemFile(extID, "images/MiniProgressGradient.png");
-    dump(file.path);
     this.dockProgress.SetGradientPath(file.path);
   },
   
