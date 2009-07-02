@@ -7,7 +7,7 @@ bbtype="text/css"?>
   title="Dock Progress Options"
   xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
  
-<prefpane id="dockprogress-pane" label="Style">
+<prefpane id="dockprogress-pane" label="Dock Style">
   <preferences>
     <preference id="pref-style" name="dockprogress.progressStyle" type="int"/>
   </preferences>

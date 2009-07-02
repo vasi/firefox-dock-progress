@@ -22,7 +22,7 @@ idl:
 
 xpi: universal
 	rm -f $(XPI)
-	zip $(XPI) -r chrome chrome.manifest components images install.rdf \
+	zip $(XPI) -r chrome chrome.manifest components defaults install.rdf \
 		-x '*/.DS_Store'
 
 .PHONY: all native universal clean %.dylib idl xpi
