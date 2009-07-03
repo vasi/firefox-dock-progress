@@ -1,5 +1,5 @@
-MOZILLA_SDK = /Users/vasi/Downloads/xulrunner-sdk
-EXTRA_LIBS = /Library/Fink/permanent/lib
+MOZILLA_SDK = $(HOME)/Hacking/xulrunner/sdk
+EXTRA_LIBS = $(subst /bin/fink,/lib,$(shell which fink))
 MAC_SDK = /Developer/SDKs/MacOSX10.4u.sdk
 
 
