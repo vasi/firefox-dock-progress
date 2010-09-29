@@ -50,6 +50,7 @@ void DockProgress::UpdateDockIcon()
 		}
 		[dockIcon unlockFocus];
 	}
+	// Use NSDockTile instead?
 	[NSApp setApplicationIconImage: dockIcon];
 }
 

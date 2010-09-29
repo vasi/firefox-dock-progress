@@ -1,5 +1,5 @@
-var dockProgress = {
-  setup: function() {
+(function() {
+  function setup() {
     this.Cc = Components.classes;
     this.Ci = Components.interfaces;
     this.IDLM = this.Ci.nsIDownloadManager;
@@ -13,9 +13,9 @@ var dockProgress = {
     
     this.findGradient();
     this.monitorPrefs();
-  },
-  
-  monitorPrefs : function() {
+  }
+    
+  function monitorPrefs() {
     this.prefs = this.Cc["@mozilla.org/preferences-service;1"]
       .getService(this.Ci.nsIPrefService)
       .getBranch("dockprogress.");
@@ -23,19 +23,19 @@ var dockProgress = {
     this.prefs.addObserver("", this, false);
     
     this.updateStyle();
-  },
+  }
   
-  observe: function(subject, topic, data) {
+  function observe(subject, topic, data) {
     if (topic == "nsPref:changed" && data == "progressStyle")
       this.updateStyle();
-  },
+  }
   
-  updateStyle: function() {
+  function updateStyle() {
     var style = this.prefs.getIntPref("progressStyle");
     this.dockProgress.SetStyle(style);
-  },
+  }
   
-  findGradient: function() {
+  function findGradient() {
     var extMgr = this.Cc["@mozilla.org/extensions/manager;1"]
       .getService(this.Ci.nsIExtensionManager);
     var extID = "dockprogress@vasi.dyndns.org";
@@ -43,9 +43,9 @@ var dockProgress = {
     var file = instLoc.getItemFile(extID,
       "chrome/content/MiniProgressGradient.png");
     this.dockProgress.SetGradientPath(file.path);
-  },
+  }
   
-  update: function(meth) {
+  function update(meth) {
     var total = 0, cur = 0;
     
     var dls = this.dlMgr.activeDownloads;
@@ -65,14 +65,15 @@ var dockProgress = {
       var pct = 100.0 * cur / total;
       this.dockProgress.SetProgress(pct);
     }
-  },
+  }
   
-  onDownloadStateChange: function(state, dl) { this.update("DL state") },
-  onStateChange: function(prog, req, flags, status, dl)
-    { this.update("state") },
-  onProgressChange: function(prog, req, cur, max, tcur, tmax, dl)
-    { this.update("progress") },
-  onSecurityChange: function(prog, req, state, dl) { this.update("security") }
-};
+  function onDownloadStateChange(state, dl) { this.update("DL state") }
+  function onStateChange(prog, req, flags, status, dl)
+    { this.update("state") }
+  function onProgressChange(prog, req, cur, max, tcur, tmax, dl)
+    { this.update("progress") }
+  function onSecurityChange(prog, req, state, dl) { this.update("security") }
+  
+  setup();
+})();
 
-dockProgress.setup();
