@@ -15,7 +15,6 @@ Thanks to Uli Kusterer (http://www.zathras.de) for the progress bar gradient, li
 Todo
 ----
 
-* addons.mozilla.org
 * Multiple progress bars
 * Throttle drawing?
 * Enforce Mac-only?

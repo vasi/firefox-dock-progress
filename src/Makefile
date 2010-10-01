@@ -1,28 +1,29 @@
-MOZILLA_SDK = $(HOME)/Hacking/xulrunner/firefox36
-EXTRA_LIBS = $(subst /bin/fink,/lib,$(shell which fink))
-MAC_SDK = /Developer/SDKs/MacOSX10.4u.sdk
+MOZILLA_SDK = $(HOME)/Hacking/xulrunner/fx30/sdk
+EXTRA_LIBS = /Library/Fink/sl32/lib
 
+MAC_SDK = /Developer/SDKs/MacOSX10.4u.sdk
+CXX_VERS = g++-4.0
+ARCHES = i386 ppc
 
 COMPONENT = DockProgress
 
-ARCHES = i386 ppc
-NATIVE = i386
-ARCH_FLAG = $(if $(ARCH),-arch $(ARCH),)
+NATIVE = $(shell arch)
+ARCH = $(NATIVE)
+ARCH_FLAG = -arch $(ARCH)
 ARCH_POST = $(if $(filter-out $(NATIVE),$(ARCH)),-$(ARCH),)
 ARCH_MOZ_SDK = $(MOZILLA_SDK)$(ARCH_POST)
-
 
 IDL_INCLUDES = $(MOZILLA_SDK)/idl
 XPIDL = env DYLD_FALLBACK_LIBRARY_PATH=$(EXTRA_LIBS) $(MOZILLA_SDK)/bin/xpidl \
 	-I$(IDL_INCLUDES)
 
-#OPT = -g
+#OPT = -O0 -g
 OPT = -Os
-CXX = g++-4.0 -Wall -Wno-non-virtual-dtor $(OPT) $(ARCH_FLAG) \
+CXX = $(CXX_VERS) -Wall -Wno-non-virtual-dtor $(OPT) $(ARCH_FLAG) \
 	-fno-rtti -fno-exceptions -fPIC -fno-strict-aliasing -fpascal-strings \
 	-fno-common -fshort-wchar
 COMPILE = $(CXX) -DXPCOM_GLUE -DXPCOM_GLUE_USE_NSPR \
-	-isysroot $(MAC_SDK) -I$(ARCH_MOZ_SDK)/include
+	-isysroot $(MAC_SDK) -I$(ARCH_MOZ_SDK)/sdk/include
 LINK = $(CXX) -Wl,-syslibroot,$(MAC_SDK) -L$(ARCH_MOZ_SDK)/lib \
 	-lxpcomglue_s -lxpcom -lnspr4 -framework Cocoa \
 	-Wl,-executable_path,$(ARCH_MOZ_SDK)/bin/xulrunner -bundle
