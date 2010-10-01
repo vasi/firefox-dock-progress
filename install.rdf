@@ -5,7 +5,7 @@
 
   <Description about="urn:mozilla:install-manifest">
     <em:id>dockprogress@vasi.dyndns.org</em:id>
-    <em:version>1.0.1</em:version>
+    <em:version>1.0.2</em:version>
     <em:type>2</em:type>
    
     <!-- Target Application this extension can install into, 
@@ -14,7 +14,7 @@
       <Description>
         <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
         <em:minVersion>3.0</em:minVersion>
-        <em:maxVersion>3.6.*</em:maxVersion>
+        <em:maxVersion>4.0.*</em:maxVersion>
       </Description>
     </em:targetApplication>
    
@@ -25,5 +25,9 @@
 	<em:homepageURL>http://github.com/vasi/firefox-dock-progress/tree/master</em:homepageURL>
     <em:optionsURL>chrome://dockprogress/content/prefs.xul</em:optionsURL>
     <em:iconURL>chrome://dockprogress/content/icon.png</em:iconURL>
-  </Description>      
+    
+    <!-- Unpack so we can use our binary components -->
+    <em:unpack>true</em:unpack>
+    <em:targetPlatform>Darwin</em:targetPlatform>
+  </Description>
 </RDF>
