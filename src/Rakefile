@@ -36,6 +36,7 @@ end
 def universal(opts)
   output, input, cflags, ldflags, opt =
     [:output, :input, :cflags, :ldflags, :opt].map { |k| opts[k] || [] }
+  suffix = opts[:suffix] || ''
   
   to_compile = input.grep(/\.(mm|m|c|cc|cpp)$/)
   ccbase = to_compile.grep(/\.(mm|cc|cpp)$/).empty? ? 'gcc' : 'g++'
@@ -46,17 +47,17 @@ def universal(opts)
   opts[:arch].each do |arch|
     to_link = []
     to_compile.each do |src|
-      to_link << subext(src, "-#{arch}.o")
+      to_link << subext(src, "-#{arch}#{suffix}.o")
       file to_link.last => ([src] + compile_add) do |t|
         compile(t, ccbase, arch, cflags, opt)
       end
     end
-    to_lipo << subext(output, "-#{arch}\\1")
+    to_lipo << subext(output, "-#{arch}#{suffix}\\1")
     file to_lipo.last => (to_link + link_add) do |t|
       link(t, ccbase, arch, ldflags, opt)
     end
   end
-  file(output => to_lipo) { |t| lipo(t) }
+  file(subext(output, "#{suffix}\\1") => to_lipo) { |t| lipo(t) }
 end
 
 
@@ -86,34 +87,40 @@ end
 COMMON_CFLAGS = %w[-fno-exceptions -fPIC -fno-strict-aliasing
   -fpascal-strings -fno-common -fshort-wchar]  
 
-def xpcom(arches, opt, suffix = '')
-  universal(
-    :arch => arches,
-    :opt => opt,
-    :output => subext('DockProgress.so', "#{suffix}\\1"),
+def xpcom(opts)
+  universal(opts.merge(
+    :output => 'DockProgress.so',
     :input => %w[DockProgress.mm ModuleDockProgress.mm IDockProgress.h],
-    :cflags => proc { |a| %w[-DXPCOM_GLUE -DXPCOM_GLUE_USE_NSPR
-        -fvisibility=hidden -Wno-non-virtual-dtor -fno-rtti] + COMMON_CFLAGS +
-        ['-I', xsdk(a, 'sdk/include')] },
-    :ldflags => proc { |a| %w[-lxpcomglue_s -lxpcom -lnspr4 -framework Cocoa
-        -bundle] + ["-L#{xsdk(a, 'lib')}",
-        "-Wl,-executable_path,#{xsdk(a, 'bin/xulrunner')}"] })
+    :cflags => proc { |a|
+      %w[-DXPCOM_GLUE -DXPCOM_GLUE_USE_NSPR -fvisibility=hidden
+        -Wno-non-virtual-dtor -fno-rtti] +
+        COMMON_CFLAGS +
+        ['-I', xsdk(a, 'sdk/include')]
+    },
+    :ldflags => proc { |a|
+      %w[-lxpcomglue_s -lxpcom -lnspr4 -framework Cocoa -bundle] +
+        ["-L#{xsdk(a, 'lib')}",
+        "-Wl,-executable_path,#{xsdk(a, 'bin/xulrunner')}"]
+    }))
 end
-def clib(arches, opt, suffix = '')
-  universal(
-    :arch => arches,
-    :opt => opt,
-    :output => subext('DockProgressC.dylib', "#{suffix}\\1"),
+def clib(opts)
+  universal(opts.merge(
+    :output => 'DockProgressC.dylib',
     :input => %w[DockProgressC.m],
     :ldflags => COMMON_CFLAGS + %w[-framework Cocoa -dynamiclib
-      -install_name @loader_path/../content/DockProgressC.dylib])
+      -install_name @loader_path/../content/DockProgressC.dylib]))
 end
+def style(xpcom_arch, clib_arch, opts)
+  xpcom(opts.merge(:arch => xpcom_arch))
+  clib(opts.merge(:arch => clib_arch))
+end
+
 
 require 'rake/clean'
 CLEAN.include('IDockProgress.h', '*.xpt', '*.o', '*.so', '*.dylib')
 
-xpcom(%w[ppc i386], %w[-Os])
-clib(%w[ppc i386 x86_64], %w[-Os])
+style(%w[ppc i386], %w[ppc i386 x86_64], :opt => %w[-Os])
+style([native_arch], [native_arch], :opt => %w[-O0 -g], :suffix => '-debug')
 
 task :all => ['DockProgress.so', 'DockProgressC.dylib']
 task :default => [:all]
