@@ -53,6 +53,7 @@ def sufa(s, arch); subext(s, '-' + arch + '\1'); end
 def universal(opts)
   output, input, cflags, ldflags, opt =
     [:output, :input, :cflags, :ldflags, :opt].map { |k| opts[k] || [] }
+  single = opts[:arch].size == 1
   
   to_compile = input.grep(/\.(mm|m|c|cc|cpp)$/)
   ccbase = to_compile.grep(/\.(mm|cc|cpp)$/).empty? ? 'gcc' : 'g++'
@@ -68,12 +69,13 @@ def universal(opts)
         compile(t, ccbase, arch, cflags, opt)
       end
     end
-    to_lipo << sufs(sufa(output, arch), opts)
+    
+    to_lipo << sufs(single ? output : sufa(output, arch), opts)
     file to_lipo.last => (to_link + link_add) do |t|
       link(t, ccbase, arch, ldflags, opt)
     end
   end
-  file(sufs(output, opts) => to_lipo) { |t| lipo(t) }
+  file(sufs(output, opts) => to_lipo) { |t| lipo(t) } unless single
   return output
 end
 
