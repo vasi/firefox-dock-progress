@@ -17,7 +17,6 @@ def archcc(cc, a)
   [cc + '-' + archccvers(a), '-arch', a, archtarg(a), '-Wall']
 end
 def archxflags(x, a); x.respond_to?(:to_proc) ? x[a] : x; end
-def subext(s, repl); s.sub(/(\.[^.]*)$/, repl); end
 
 def compile(target, cc, arch, xflags, sflags)
   sh *(archcc(cc, arch) + archxflags(xflags, arch) + sflags +
@@ -33,10 +32,12 @@ def lipo(target)
   sh *(%w[lipo -create -output] + [target.name] + target.prerequisites)
 end
 
+def subext(s, repl); s.sub(/(\.[^.]*)$/, repl); end
+def sufs(s, opts); subext(s, (opts[:suffix] || '') + '\1'); end
+def sufa(s, arch); subext(s, '-' + arch + '\1'); end
 def universal(opts)
   output, input, cflags, ldflags, opt =
     [:output, :input, :cflags, :ldflags, :opt].map { |k| opts[k] || [] }
-  suffix = opts[:suffix] || ''
   
   to_compile = input.grep(/\.(mm|m|c|cc|cpp)$/)
   ccbase = to_compile.grep(/\.(mm|cc|cpp)$/).empty? ? 'gcc' : 'g++'
@@ -47,17 +48,17 @@ def universal(opts)
   opts[:arch].each do |arch|
     to_link = []
     to_compile.each do |src|
-      to_link << subext(src, "-#{arch}#{suffix}.o")
+      to_link << sufs(sufa(subext(src, '.o'), arch), opts)
       file to_link.last => ([src] + compile_add) do |t|
         compile(t, ccbase, arch, cflags, opt)
       end
     end
-    to_lipo << subext(output, "-#{arch}#{suffix}\\1")
+    to_lipo << sufs(sufa(output, arch), opts)
     file to_lipo.last => (to_link + link_add) do |t|
       link(t, ccbase, arch, ldflags, opt)
     end
   end
-  file(subext(output, "#{suffix}\\1") => to_lipo) { |t| lipo(t) }
+  file(sufs(output, opts) => to_lipo) { |t| lipo(t) }
 end
 
 
@@ -90,7 +91,8 @@ COMMON_CFLAGS = %w[-fno-exceptions -fPIC -fno-strict-aliasing
 def xpcom(opts)
   universal(opts.merge(
     :output => 'DockProgress.so',
-    :input => %w[DockProgress.mm ModuleDockProgress.mm IDockProgress.h],
+    :input => %w[DockProgress.mm ModuleDockProgress.mm IDockProgress.h] +
+      [sufs('DockProgressC.dylib', opts)],
     :cflags => proc { |a|
       %w[-DXPCOM_GLUE -DXPCOM_GLUE_USE_NSPR -fvisibility=hidden
         -Wno-non-virtual-dtor -fno-rtti] +
@@ -122,5 +124,5 @@ CLEAN.include('IDockProgress.h', '*.xpt', '*.o', '*.so', '*.dylib')
 style(%w[ppc i386], %w[ppc i386 x86_64], :opt => %w[-Os])
 style([native_arch], [native_arch], :opt => %w[-O0 -g], :suffix => '-debug')
 
-task :all => ['DockProgress.so', 'DockProgressC.dylib']
+task :all => ['DockProgress.so']
 task :default => [:all]
