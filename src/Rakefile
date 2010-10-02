@@ -107,7 +107,8 @@ COMMON_CFLAGS = %w[-fno-exceptions -fPIC -fno-strict-aliasing
 def xpcom(opts)
   universal(opts.merge(
     :output => 'DockProgress.dylib',
-    :input => %w[DockProgress.mm ModuleDockProgress.mm IDockProgress.h] +
+    :input => %w[DockProgress.mm ModuleDockProgress.mm IDockProgress.h
+        DockProgressC.h] +
       [sufs('DockProgressC.dylib', opts)],
     :cflags => proc { |a|
       %w[-DXPCOM_GLUE -DXPCOM_GLUE_USE_NSPR -Wno-non-virtual-dtor -fno-rtti] +
@@ -122,7 +123,7 @@ end
 def clib(opts)
   universal(opts.merge(
     :output => 'DockProgressC.dylib',
-    :input => %w[DockProgressC.m],
+    :input => %w[DockProgressC.m DockProgressC.h],
     :ldflags => COMMON_CFLAGS + %w[-framework Cocoa -dynamiclib
       -install_name @loader_path/../chrome/content/DockProgressC.dylib]))
 end

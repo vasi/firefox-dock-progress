@@ -1,14 +1,4 @@
-/**** Interface ****/
-typedef enum {
-	kFDPStyleBar,
-	kFDPStyleFill,
-} FDPStyle;
-
-void FDPSetHidden(void);
-void FDPSetProgress(double percent);
-void FDPSetStyle(FDPStyle style);
-void FPDSetGradientPath(const char *path);
-
+#include "DockProgressC.h"
 
 /**** Internal definitions ****/
 
@@ -39,7 +29,7 @@ void FDPSetStyle(FDPStyle style) {
 	gFDPStyle = style;
 }
 
-void FPDSetGradientPath(const char *path) {
+void FDPSetGradientPath(const char *path) {
 	NSString *imgPath = [NSString stringWithUTF8String: path];
 	gFDPGradient = [[NSImage alloc] initByReferencingFile: imgPath];
 }
