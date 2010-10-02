@@ -1,0 +1,119 @@
+# Path to xulrunner SDKs. The actual SDKs should be in subdirs
+# named after each arch.
+ENV['XULRUNNER_SDK_DIR'] ||= ENV['HOME'] + '/Hacking/xulrunner/fx30'
+
+# Path to libraries necessary for xpidl to run (libIDL-2.0.dylib, etc.)
+ENV['XPIDL_LIBS'] ||= '/Library/Fink/sl32/lib'
+
+
+def archsdkid(a); a == 'x86_64' ? '10.6' : '10.4u'; end
+def archccvers(a); (a == 'x86_64' ? '4.2' : '4.0'); end
+
+def archsdk(a); "/Developer/SDKs/MacOSX#{archsdkid(a)}.sdk"; end
+def archtarg(a)
+  "-mmacosx-version-min=#{archsdkid(a).match(/\d\d\.\d/)[0]}"
+end
+def archcc(cc, a)
+  [cc + '-' + archccvers(a), '-arch', a, archtarg(a), '-Wall']
+end
+def archxflags(x, a); x.respond_to?(:to_proc) ? x[a] : x; end
+def subext(s, repl); s.sub(/(\.[^.]*)$/, repl); end
+
+def compile(target, cc, arch, xflags, sflags)
+  sh *(archcc(cc, arch) + archxflags(xflags, arch) + sflags +
+    ['-isysroot', archsdk(arch), '-c', '-o', target.name,
+      target.prerequisites.first])
+end
+def link(target, cc, arch, xflags, sflags)
+  sh *(archcc(cc, arch) + archxflags(xflags, arch) + sflags +
+    ["-Wl,-syslibroot,#{archsdk(arch)}", '-o', target.name] +
+    target.prerequisites)
+end
+def lipo(target)
+  sh *(%w[lipo -create -output] + [target.name] + target.prerequisites)
+end
+
+def universal(opts)
+  output, input, cflags, ldflags, opt =
+    [:output, :input, :cflags, :ldflags, :opt].map { |k| opts[k] || [] }
+  
+  to_compile = input.grep(/\.(mm|m|c|cc|cpp)$/)
+  ccbase = to_compile.grep(/\.(mm|cc|cpp)$/).empty? ? 'gcc' : 'g++'
+  link_add = input.grep(/\.(dylib|so)$/)
+  compile_add = input - to_compile - link_add
+  
+  to_lipo = []
+  opts[:arch].each do |arch|
+    to_link = []
+    to_compile.each do |src|
+      to_link << subext(src, "-#{arch}.o")
+      file to_link.last => ([src] + compile_add) do |t|
+        compile(t, ccbase, arch, cflags, opt)
+      end
+    end
+    to_lipo << subext(output, "-#{arch}\\1")
+    file to_lipo.last => (to_link + link_add) do |t|
+      link(t, ccbase, arch, ldflags, opt)
+    end
+  end
+  file(output => to_lipo) { |t| lipo(t) }
+end
+
+
+def native_arch; @native ||= `arch`.chomp; end
+
+# Get a path in the xulrunner sdk
+def xsdk(arch, path)
+  [ENV['XULRUNNER_SDK_DIR'], arch, path].join('/')
+end
+def xnative(path); xsdk(native_arch, path); end
+
+# Run xpidl
+def xpidl(target, mode)
+  sh 'env', "DYLD_FALLBACK_LIBRARY_PATH=#{ENV['XPIDL_LIBS']}",
+    xnative('bin/xpidl'), '-I', xnative('idl'),
+    '-m', mode,
+    '-e', target.name, target.source
+end
+
+rule('.h' => '.idl') { |t| xpidl(t, 'header') }
+rule('.xpt' => '.idl') { |t| xpidl(t, 'typelib') }
+rule '.xpt' => proc { |t| 'I' + t } do |t|
+  sh xnative('bin/xpt_link'), t.name, t.source
+end
+
+
+COMMON_CFLAGS = %w[-fno-exceptions -fPIC -fno-strict-aliasing
+  -fpascal-strings -fno-common -fshort-wchar]  
+
+def xpcom(arches, opt, suffix = '')
+  universal(
+    :arch => arches,
+    :opt => opt,
+    :output => subext('DockProgress.so', "#{suffix}\\1"),
+    :input => %w[DockProgress.mm ModuleDockProgress.mm IDockProgress.h],
+    :cflags => proc { |a| %w[-DXPCOM_GLUE -DXPCOM_GLUE_USE_NSPR
+        -fvisibility=hidden -Wno-non-virtual-dtor -fno-rtti] + COMMON_CFLAGS +
+        ['-I', xsdk(a, 'sdk/include')] },
+    :ldflags => proc { |a| %w[-lxpcomglue_s -lxpcom -lnspr4 -framework Cocoa
+        -bundle] + ["-L#{xsdk(a, 'lib')}",
+        "-Wl,-executable_path,#{xsdk(a, 'bin/xulrunner')}"] })
+end
+def clib(arches, opt, suffix = '')
+  universal(
+    :arch => arches,
+    :opt => opt,
+    :output => subext('DockProgressC.dylib', "#{suffix}\\1"),
+    :input => %w[DockProgressC.m],
+    :ldflags => COMMON_CFLAGS + %w[-framework Cocoa -dynamiclib
+      -install_name @loader_path/../content/DockProgressC.dylib])
+end
+
+require 'rake/clean'
+CLEAN.include('IDockProgress.h', '*.xpt', '*.o', '*.so', '*.dylib')
+
+xpcom(%w[ppc i386], %w[-Os])
+clib(%w[ppc i386 x86_64], %w[-Os])
+
+task :all => ['DockProgress.so', 'DockProgressC.dylib']
+task :default => [:all]

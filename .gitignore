@@ -2,5 +2,6 @@ components
 *.xpt
 *.o
 *.dylib
+*.so
 src/IDockProgress.h
 *.xpi
