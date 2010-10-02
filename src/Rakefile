@@ -126,7 +126,7 @@ def clib(opts)
     :output => 'DockProgressC.dylib',
     :input => %w[DockProgressC.m],
     :ldflags => COMMON_CFLAGS + %w[-framework Cocoa -dynamiclib
-      -install_name @loader_path/../content/DockProgressC.dylib]))
+      -install_name @loader_path/../chrome/content/DockProgressC.dylib]))
 end
 
 
@@ -137,7 +137,8 @@ def style(name, xpcom_arch, clib_arch, opts)
     :xpcom => xpcom(opts.merge(:arch => xpcom_arch)),
     :clib => clib(opts.merge(:arch => clib_arch)),
   }
-  task name => STYLES[name].values.map { |f| sufs(f, opts) }
+  task name => STYLES[name].values.map { |f| sufs(f, opts) } +
+    %w[DockProgress.xpt]
   STYLES[name][:suf] = opts[:suffix]
 end
 style(:release, %w[ppc i386], %w[ppc i386 x86_64], :opt => %w[-Os])
@@ -146,9 +147,13 @@ style(:debug, [native_arch], [native_arch], :opt => %w[-O0 -g],
 
 
 # Install tasks
-def install(src, dst, suf); ln sufs(src, suf), dst, :force => true; end
+def install(src, dst, suf = nil)
+  ln sufs(src, suf), File.join(dst, src), :force => true
+end
 STYLES.each do |n, v|
   task sufs('install', v[:suf]) => n do |t|
+    mkdir_p('../components')
+    install('DockProgress.xpt', '../components/')
     install(v[:xpcom], '../components/', v[:suf])
     install(v[:clib], '../chrome/content/', v[:suf])
   end

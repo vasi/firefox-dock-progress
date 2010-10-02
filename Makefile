@@ -1,28 +1,25 @@
 VERSION = $(shell perl -ne 'print $$1 if m,<em:version>(.*)</em:version>,' \
 	install.rdf)
 XPI = DockProgress-$(VERSION).xpi
+ZIP = rm -f $(XPI) && zip $(XPI) -r chrome chrome.manifest components \
+	defaults install.rdf -x '*/.DS_Store'
+RAKE = $(MAKE) -C src
 
-all: universal
-
-native: DockProgress.dylib
-universal: DockProgress-universal.dylib
-
-%.dylib:
-	$(MAKE) -C src $@ DockProgress.xpt
-	mkdir -p components
-	ln -f src/DockProgress.xpt components/
-	ln -f src/$@ components/DockProgress.dylib
+all: release
+release:
+	$(RAKE) release
+debug:
+	$(RAKE) debug
 
 clean:
-	$(MAKE) -C src clean
-	rm -rf components *.xpi
+	$(RAKE) clean
+	rm -rf components chrome/content/*.dylib *.xpi
 
-idl:
-	$(MAKE) -C src $@
+xpi: release
+	$(RAKE) install
+	$(ZIP)
+xpid: debug
+	$(RAKE) install-debug
+	$(ZIP)
 
-xpi: universal
-	rm -f $(XPI)
-	zip $(XPI) -r chrome chrome.manifest components defaults install.rdf \
-		-x '*/.DS_Store'
-
-.PHONY: all native universal clean %.dylib idl xpi
+.PHONY: all release debug clean xpi xpid
