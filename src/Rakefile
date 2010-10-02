@@ -112,17 +112,18 @@ def clib(opts)
     :ldflags => COMMON_CFLAGS + %w[-framework Cocoa -dynamiclib
       -install_name @loader_path/../content/DockProgressC.dylib]))
 end
-def style(xpcom_arch, clib_arch, opts)
+def style(name, xpcom_arch, clib_arch, opts)
   xpcom(opts.merge(:arch => xpcom_arch))
   clib(opts.merge(:arch => clib_arch))
+  task name => sufs('DockProgress.so', opts)
 end
 
 
 require 'rake/clean'
 CLEAN.include('IDockProgress.h', '*.xpt', '*.o', '*.so', '*.dylib')
 
-style(%w[ppc i386], %w[ppc i386 x86_64], :opt => %w[-Os])
-style([native_arch], [native_arch], :opt => %w[-O0 -g], :suffix => '-debug')
+style(:release, %w[ppc i386], %w[ppc i386 x86_64], :opt => %w[-Os])
+style(:debug, [native_arch], [native_arch], :opt => %w[-O0 -g],
+  :suffix => '-debug')
 
-task :all => ['DockProgress.so']
-task :default => [:all]
+task :default => :release
