@@ -6,9 +6,14 @@ ENV['XULRUNNER_SDK_DIR'] ||= ENV['HOME'] + '/Hacking/xulrunner/fx30'
 ENV['XPIDL_LIBS'] ||= '/Library/Fink/sl32/lib'
 
 
+Rake.application.options.threads = `sysctl -n hw.ncpu`.to_i
+
+# Decide what SDKs we want for each arch
+def native_arch; @native ||= `arch`.chomp; end
 def archsdkid(a); a == 'x86_64' ? '10.6' : '10.4u'; end
 def archccvers(a); (a == 'x86_64' ? '4.2' : '4.0'); end
 
+# Utilities for arch flags
 def archsdk(a); "/Developer/SDKs/MacOSX#{archsdkid(a)}.sdk"; end
 def archtarg(a)
   "-mmacosx-version-min=#{archsdkid(a).match(/\d\d\.\d/)[0]}"
@@ -16,15 +21,18 @@ end
 def archcc(cc, a)
   [cc + '-' + archccvers(a), '-arch', a, archtarg(a), '-Wall']
 end
+# Allow flags to expand to include arch-dependent data
 def archxflags(x, a); x.respond_to?(:to_proc) ? x[a] : x; end
 
-def compile(target, cc, arch, xflags, sflags)
-  sh *(archcc(cc, arch) + archxflags(xflags, arch) + sflags +
+
+# Build something for a particular arch
+def compile(target, cc, arch, xflags, strflags)
+  sh *(archcc(cc, arch) + archxflags(xflags, arch) + strflags +
     ['-isysroot', archsdk(arch), '-c', '-o', target.name,
       target.prerequisites.first])
 end
-def link(target, cc, arch, xflags, sflags)
-  sh *(archcc(cc, arch) + archxflags(xflags, arch) + sflags +
+def link(target, cc, arch, xflags, strflags)
+  sh *(archcc(cc, arch) + archxflags(xflags, arch) + strflags +
     ["-Wl,-syslibroot,#{archsdk(arch)}", '-o', target.name] +
     target.prerequisites)
 end
@@ -32,9 +40,16 @@ def lipo(target)
   sh *(%w[lipo -create -output] + [target.name] + target.prerequisites)
 end
 
-def subext(s, repl); s.sub(/(\.[^.]*)$/, repl); end
-def sufs(s, opts); subext(s, (opts[:suffix] || '') + '\1'); end
+
+# Filename-munging: Substitute based on ext; add basename suffix; add arch suf
+def subext(s, repl); s.sub(/(\.[^.]*|)$/, repl); end
+def sufs(s, suf)
+  suf = suf[:suffix] if Hash === suf
+  subext(s, (suf || '') + '\1')
+end
 def sufa(s, arch); subext(s, '-' + arch + '\1'); end
+
+# Build a universal binary
 def universal(opts)
   output, input, cflags, ldflags, opt =
     [:output, :input, :cflags, :ldflags, :opt].map { |k| opts[k] || [] }
@@ -59,10 +74,9 @@ def universal(opts)
     end
   end
   file(sufs(output, opts) => to_lipo) { |t| lipo(t) }
+  return output
 end
 
-
-def native_arch; @native ||= `arch`.chomp; end
 
 # Get a path in the xulrunner sdk
 def xsdk(arch, path)
@@ -70,14 +84,13 @@ def xsdk(arch, path)
 end
 def xnative(path); xsdk(native_arch, path); end
 
-# Run xpidl
+# Run xulrunner utils
 def xpidl(target, mode)
   sh 'env', "DYLD_FALLBACK_LIBRARY_PATH=#{ENV['XPIDL_LIBS']}",
     xnative('bin/xpidl'), '-I', xnative('idl'),
     '-m', mode,
     '-e', target.name, target.source
 end
-
 rule('.h' => '.idl') { |t| xpidl(t, 'header') }
 rule('.xpt' => '.idl') { |t| xpidl(t, 'typelib') }
 rule '.xpt' => proc { |t| 'I' + t } do |t|
@@ -85,6 +98,7 @@ rule '.xpt' => proc { |t| 'I' + t } do |t|
 end
 
 
+# Define how to build our binaries
 COMMON_CFLAGS = %w[-fno-exceptions -fPIC -fno-strict-aliasing
   -fpascal-strings -fno-common -fshort-wchar]  
 
@@ -112,18 +126,33 @@ def clib(opts)
     :ldflags => COMMON_CFLAGS + %w[-framework Cocoa -dynamiclib
       -install_name @loader_path/../content/DockProgressC.dylib]))
 end
+
+
+# Define build styles
+STYLES = {}
 def style(name, xpcom_arch, clib_arch, opts)
-  xpcom(opts.merge(:arch => xpcom_arch))
-  clib(opts.merge(:arch => clib_arch))
-  task name => sufs('DockProgress.so', opts)
+  STYLES[name] = {
+    :xpcom => xpcom(opts.merge(:arch => xpcom_arch)),
+    :clib => clib(opts.merge(:arch => clib_arch)),
+  }
+  task name => STYLES[name].values.map { |f| sufs(f, opts) }
+  STYLES[name][:suf] = opts[:suffix]
+end
+style(:release, %w[ppc i386], %w[ppc i386 x86_64], :opt => %w[-Os])
+style(:debug, [native_arch], [native_arch], :opt => %w[-O0 -g],
+  :suffix => '-debug')
+
+
+# Install tasks
+def install(src, dst, suf); ln sufs(src, suf), dst, :force => true; end
+STYLES.each do |n, v|
+  task sufs('install', v[:suf]) => n do |t|
+    install(v[:xpcom], '../components/', v[:suf])
+    install(v[:clib], '../chrome/content/', v[:suf])
+  end
 end
 
 
 require 'rake/clean'
 CLEAN.include('IDockProgress.h', '*.xpt', '*.o', '*.so', '*.dylib')
-
-style(:release, %w[ppc i386], %w[ppc i386 x86_64], :opt => %w[-Os])
-style(:debug, [native_arch], [native_arch], :opt => %w[-O0 -g],
-  :suffix => '-debug')
-
 task :default => :release
