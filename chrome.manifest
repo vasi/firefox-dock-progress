@@ -1,4 +1,4 @@
 content		dockprogress	chrome/content/
 interfaces  components/DockProgress.xpt
-binary-component  components/DockProgress.so appversion<=3.99
+binary-component  components/DockProgress.dylib appversion<=3.99
 overlay		chrome://browser/content/browser.xul	chrome://dockprogress/content/dockprogress.xul

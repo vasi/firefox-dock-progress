@@ -106,14 +106,12 @@ COMMON_CFLAGS = %w[-fno-exceptions -fPIC -fno-strict-aliasing
 
 def xpcom(opts)
   universal(opts.merge(
-    :output => 'DockProgress.so',
+    :output => 'DockProgress.dylib',
     :input => %w[DockProgress.mm ModuleDockProgress.mm IDockProgress.h] +
       [sufs('DockProgressC.dylib', opts)],
     :cflags => proc { |a|
-      %w[-DXPCOM_GLUE -DXPCOM_GLUE_USE_NSPR -fvisibility=hidden
-        -Wno-non-virtual-dtor -fno-rtti] +
-        COMMON_CFLAGS +
-        ['-I', xsdk(a, 'sdk/include')]
+      %w[-DXPCOM_GLUE -DXPCOM_GLUE_USE_NSPR -Wno-non-virtual-dtor -fno-rtti] +
+        COMMON_CFLAGS + ['-I', xsdk(a, 'sdk/include')]
     },
     :ldflags => proc { |a|
       %w[-lxpcomglue_s -lxpcom -lnspr4 -framework Cocoa -bundle] +
