@@ -2,19 +2,20 @@
 <?xml-stylesheet href="chrome://global/skin/global.css" type="text/css"?>
 <?xml-stylesheet href="chrome://dockprogress/content/prefs.css"
 bbtype="text/css"?>
+<!DOCTYPE prefwindow SYSTEM "chrome://dockprogress/locale/prefs.dtd">
  
 <prefwindow id="dockprogress-prefs"
-  title="Dock Progress Options"
+  title="&title;"
   xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
  
-<prefpane id="dockprogress-pane" label="Dock Style">
+<prefpane id="dockprogress-pane" label="&pane.label;">
   <preferences>
     <preference id="pref-style" name="dockprogress.progressStyle" type="int"/>
   </preferences>
   
   <radiogroup id="style-group" preference="pref-style">
-	<radio id="bar" label="Progress bar" value="0"/>
-	<radio id="fill" label="Icon fill" value="1"/>
+	<radio id="bar" label="&bar.label;" value="0"/>
+	<radio id="fill" label="&fill.label;" value="1"/>
   </radiogroup>
 </prefpane>
 
