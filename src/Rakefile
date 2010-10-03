@@ -151,7 +151,6 @@ def install(src, dst, suf = nil)
 end
 STYLES.each do |n, v|
   task sufs('install', v[:suf]) => n do |t|
-    mkdir_p('../components')
     install('DockProgress.xpt', '../components/')
     install(v[:xpcom], '../components/', v[:suf])
     install(v[:clib], '../chrome/content/', v[:suf])

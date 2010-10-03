@@ -13,7 +13,7 @@ debug:
 
 clean:
 	$(RAKE) clean
-	rm -rf components chrome/content/*.dylib *.xpi
+	rm -rf components/*.dylib components/*.xpt chrome/content/*.dylib *.xpi
 
 xpi: release
 	$(RAKE) install

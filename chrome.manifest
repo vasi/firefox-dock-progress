@@ -1,4 +1,6 @@
 content		dockprogress	chrome/content/
 interfaces  components/DockProgress.xpt
-binary-component  components/DockProgress.dylib appversion<=3.99
+component {3146FBBB-CBDF-4A0F-BC00-00CAD2C75E58} components/DockProgress.js appversion>3.*
+contract @vasi.dyndns.org/DockProgress/DockProgress;1 {3146FBBB-CBDF-4A0F-BC00-00CAD2C75E58} appversion>3.*
+binary-component  components/DockProgress.dylib appversion<=3.*
 overlay		chrome://browser/content/browser.xul	chrome://dockprogress/content/dockprogress.xul

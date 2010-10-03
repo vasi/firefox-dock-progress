@@ -36,13 +36,15 @@ var dockProgress = {
   },
   
   findGradient: function() {
-    var extMgr = this.Cc["@mozilla.org/extensions/manager;1"]
-      .getService(this.Ci.nsIExtensionManager);
-    var extID = "dockprogress@vasi.dyndns.org";
-    var instLoc = extMgr.getInstallLocation(extID);
-    var file = instLoc.getItemFile(extID,
-      "chrome/content/MiniProgressGradient.png");
-    this.dockProgress.SetGradientPath(file.path);
+    var chromeURI = "chrome://dockprogress/content/MiniProgressGradient.png";
+    var cr = this.Cc['@mozilla.org/chrome/chrome-registry;1']
+             .getService(this.Ci.nsIChromeRegistry);
+    var io = this.Cc['@mozilla.org/network/io-service;1']
+             .getService(this.Ci.nsIIOService);
+    var uri = io.newURI(decodeURI(chromeURI), 'UTF-8', null);
+    var fileURL = cr.convertChromeURL(uri);
+    var path = fileURL.QueryInterface(this.Ci.nsIFileURL).file.path;
+    this.dockProgress.SetGradientPath(path);
   },
   
   update: function(meth) {
