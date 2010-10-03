@@ -5,7 +5,7 @@
 
   <Description about="urn:mozilla:install-manifest">
     <em:id>dockprogress@vasi.dyndns.org</em:id>
-    <em:version>1.1b1</em:version>
+    <em:version>1.1</em:version>
     <em:type>2</em:type>
    
     <!-- Target Application this extension can install into, 
@@ -19,24 +19,32 @@
     </em:targetApplication>
    
     <!-- Front End MetaData -->
+		<em:name>Dock Progress</em:name>
+		<em:description>Displays the progress of downloads in the Mac OS X dock</em:description>
+    <em:creator>Dave Vasilevsky</em:creator>
+		<em:homepageURL>http://github.com/vasi/firefox-dock-progress/tree/master</em:homepageURL>
+    <em:optionsURL>chrome://dockprogress/content/prefs.xul</em:optionsURL>
+		
+		<!-- Localizations -->
 		<em:localized>
 			<Description>
 				<em:locale>en-US</em:locale>
 				<em:name>Dock Progress</em:name>
     		<em:description>Displays the progress of downloads in the Mac OS X dock</em:description>
+		    <em:creator>Dave Vasilevsky</em:creator>
+				<em:homepageURL>http://github.com/vasi/firefox-dock-progress/tree/master</em:homepageURL>
 			</Description>
 		</em:localized>
 		<em:localized>
 			<Description>
 				<em:locale>fr-FR</em:locale>
 				<em:name>Dock Progress</em:name>
-    		<em:description>Affiche la progression des téléchargements dans le Dock Mac OS X</em:description>
+				<em:description>Affiche la progression des téléchargements dans le Dock Mac OS X</em:description>
+		    <em:creator>Dave Vasilevsky</em:creator>
+				<em:homepageURL>http://github.com/vasi/firefox-dock-progress/tree/master</em:homepageURL>
 			</Description>
 		</em:localized>
 
-    <em:creator>Dave Vasilevsky</em:creator>
-		<em:homepageURL>http://github.com/vasi/firefox-dock-progress/tree/master</em:homepageURL>
-    <em:optionsURL>chrome://dockprogress/content/prefs.xul</em:optionsURL>
     
     <!-- Unpack so we can use our binary components -->
     <em:unpack>true</em:unpack>
