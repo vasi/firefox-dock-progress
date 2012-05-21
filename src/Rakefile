@@ -1,9 +1,6 @@
 # Path to xulrunner SDKs. The actual SDKs should be in subdirs
 # named after each arch.
-ENV['XULRUNNER_SDK_DIR'] ||= ENV['HOME'] + '/Hacking/xulrunner/fx30'
-
-# Path to libraries necessary for xpidl to run (libIDL-2.0.dylib, etc.)
-ENV['XPIDL_LIBS'] ||= '/Library/Fink/sl32/lib'
+ENV['XULRUNNER_SDK_DIR'] ||= ENV['HOME'] + '/Hacking/xulrunner/fx12'
 
 
 Rake.application.options.threads = `sysctl -n hw.ncpu`.to_i
@@ -89,17 +86,10 @@ end
 
 
 # Get a path in the xulrunner sdk
-def xsdk(arch, path)
-  [ENV['XULRUNNER_SDK_DIR'], arch, path].join('/')
-end
-def xnative(path); xsdk(native_arch, path); end
-
-# Run xulrunner utils
-def xpidl(target, mode)
-  sh 'env', "DYLD_FALLBACK_LIBRARY_PATH=#{ENV['XPIDL_LIBS']}",
-    xnative('bin/xpidl'), '-I', xnative('idl'),
-    '-m', mode,
-    '-e', target.name, target.source
+def xsdk(path); [ENV['XULRUNNER_SDK_DIR'], path].join('/'); end
+def xpidl(target, mode) # Run xulrunner utils
+  sh 'python', xsdk("sdk/bin/#{mode}.py"), '-I', xsdk('idl'),
+    '-o', target.name, target.source
 end
 rule('.xpt' => '.idl') { |t| xpidl(t, 'typelib') }
 
