@@ -154,14 +154,14 @@ style(:debug, [native_arch], [native_arch], :opt => %w[-O0 -g],
 
 
 # Install tasks
-def install(src, dst, suf = nil)
+def xinstall(src, dst, suf = nil)
   ln sufs(src, suf), File.join(dst, src), :force => true
 end
 STYLES.each do |n, v|
   task sufs('install', v[:suf]) => n do |t|
-    install('DockProgress.xpt', '../components/')
-    install(v[:xpcom], '../components/', v[:suf])
-    install(v[:clib], '../chrome/content/', v[:suf])
+    xinstall('DockProgress.xpt', '../components/')
+    xinstall(v[:xpcom], '../components/', v[:suf])
+    xinstall(v[:clib], '../chrome/content/', v[:suf])
   end
 end
 
