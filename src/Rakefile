@@ -1,8 +1,3 @@
-# Path to xulrunner SDKs. The actual SDKs should be in subdirs
-# named after each arch.
-ENV['XULRUNNER_SDK_DIR'] ||= ENV['HOME'] + '/Hacking/xulrunner/fx12'
-
-
 Rake.application.options.threads = `sysctl -n hw.ncpu`.to_i
 
 # Decide what SDKs we want for each arch
@@ -83,14 +78,6 @@ def universal(opts)
 end
 
 
-# Get a path in the xulrunner sdk
-def xsdk(path); [ENV['XULRUNNER_SDK_DIR'], path].join('/'); end
-def xpidl(target, mode) # Run xulrunner utils
-  sh 'python', xsdk("sdk/bin/#{mode}.py"), '-I', xsdk('idl'),
-    '-o', target.name, target.source
-end
-rule('.xpt' => '.idl') { |t| xpidl(t, 'typelib') }
-
 # Define how to build our binaries
 COMMON_CFLAGS = %w[-fno-exceptions -fPIC -fno-strict-aliasing
   -fpascal-strings -fno-common -fshort-wchar]  
@@ -110,8 +97,7 @@ def style(name, clib_arch, opts)
   STYLES[name] = {
     :clib => clib(opts.merge(:arch => clib_arch)),
   }
-  task name => STYLES[name].values.map { |f| sufs(f, opts) } +
-    %w[DockProgress.xpt]
+  task name => STYLES[name].values.map { |f| sufs(f, opts) }
   STYLES[name][:suf] = opts[:suffix]
 end
 style(:release, %w[ppc i386 x86_64], :opt => %w[-Os])
@@ -125,7 +111,6 @@ def xinstall(src, dst, suf = nil)
 end
 STYLES.each do |n, v|
   task sufs('install', v[:suf]) => n do |t|
-    xinstall('DockProgress.xpt', '../components/')
     xinstall(v[:clib], '../chrome/content/', v[:suf])
   end
 end

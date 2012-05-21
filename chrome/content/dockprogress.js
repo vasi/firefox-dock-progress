@@ -8,8 +8,8 @@ var dockProgress = {
       .getService(this.IDLM);
     this.dlMgr.addListener(this);
     
-    this.dockProgress = this.Cc["@vasi.dyndns.org/DockProgress/DockProgress;1"]
-      .getService(this.Ci.IDockProgress);
+	Components.utils.import("chrome://dockprogress/content/DockProgress.jsm");
+	this.dockProgress = new DockProgress();
     
     this.findGradient();
     this.monitorPrefs();

@@ -1,4 +1,4 @@
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
+var EXPORTED_SYMBOLS = [ "DockProgress" ];
 
 function DockProgress() {
     Components.utils.import("resource://gre/modules/ctypes.jsm");
@@ -16,11 +16,6 @@ function DockProgress() {
 }
 
 DockProgress.prototype = {
-  classDescription: "Dock icon progress bar",
-  classID:          Components.ID("{3146FBBB-CBDF-4A0F-BC00-00CAD2C75E58}"),
-  contractID:       "@vasi.dyndns.org/DockProgress/DockProgress;1",
-  QueryInterface: XPCOMUtils.generateQI([Components.interfaces.IDockProgress]),
-  
   SetHidden: function() {
       this.cSetHidden();
   },
@@ -49,5 +44,3 @@ DockProgress.prototype = {
   }
   
 };
-
-const NSGetFactory = XPCOMUtils.generateNSGetFactory([DockProgress]);
