@@ -1,5 +1,7 @@
+RAKE := $(shell drake -V >&/dev/null && echo drake || echo rake)
+
 %:
-	@drake $@
+	@$(RAKE) $@
 all:
-	@drake
+	@$(RAKE) release
 .PHONY: all
