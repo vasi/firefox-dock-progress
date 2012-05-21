@@ -10,20 +10,19 @@ def native_arch; @native ||= `arch`.chomp; end
 def archsdkid(a); a == 'x86_64' ? '10.6' : '10.4u'; end
 
 # Utilities for arch flags
+@archs = {}
 def archsdk(a)
-  i = archsdkid(a)
-  if i >= "10.6"
-    return `xcodebuild -version -sdk macosx#{i} Path`.strip
-  else
-    return "/Xcode3/SDKs/MacOSX#{archsdkid(a)}.sdk"
+  @archs[a] ||= begin
+    i = archsdkid(a)
+    (i >= "10.6") ? `xcodebuild -version -sdk macosx#{i} Path`.strip :
+      "/Xcode3/SDKs/MacOSX#{archsdkid(a)}.sdk"
   end
 end
 def archtarg(a)
   "-mmacosx-version-min=#{archsdkid(a).match(/\d\d\.\d/)[0]}"
 end
-def archcc(cc, a)
-  clang = (cc == 'g++') ? 'clang++' : 'clang'
-  compiler = (a == 'x86_64') ? clang : "#{cc}-4.0"
+def archcc(a)
+  compiler = (a == 'x86_64') ? 'clang' : 'gcc-4.0'
   [compiler, '-arch', a, archtarg(a), '-Wall']
 end
 # Allow flags to expand to include arch-dependent data
@@ -31,13 +30,13 @@ def archxflags(x, a); x.respond_to?(:to_proc) ? x[a] : x; end
 
 
 # Build something for a particular arch
-def compile(target, cc, arch, xflags, strflags)
-  sh *(archcc(cc, arch) + archxflags(xflags, arch) + strflags +
+def compile(target, arch, xflags, strflags)
+  sh *(archcc(arch) + archxflags(xflags, arch) + strflags +
     ['-isysroot', archsdk(arch), '-c', '-o', target.name,
       target.prerequisites.first])
 end
-def xlink(target, cc, arch, xflags, strflags)
-  sh *(archcc(cc, arch) + archxflags(xflags, arch) + strflags +
+def xlink(target, arch, xflags, strflags)
+  sh *(archcc(arch) + archxflags(xflags, arch) + strflags +
     ["-Wl,-syslibroot,#{archsdk(arch)}", '-o', target.name] +
     target.prerequisites)
 end
@@ -61,7 +60,6 @@ def universal(opts)
   single = opts[:arch].size == 1
   
   to_compile = input.grep(/\.(mm|m|c|cc|cpp)$/)
-  ccbase = to_compile.grep(/\.(mm|cc|cpp)$/).empty? ? 'gcc' : 'g++'
   link_add = input.grep(/\.(dylib|so)$/)
   compile_add = input - to_compile - link_add
   
@@ -71,13 +69,13 @@ def universal(opts)
     to_compile.each do |src|
       to_link << sufs(sufa(subext(src, '.o'), arch), opts)
       file to_link.last => ([src] + compile_add) do |t|
-        compile(t, ccbase, arch, cflags, opt)
+        compile(t, arch, cflags, opt)
       end
     end
     
     to_lipo << sufs(single ? output : sufa(output, arch), opts)
     file to_lipo.last => (to_link + link_add) do |t|
-      xlink(t, ccbase, arch, ldflags, opt)
+      xlink(t, arch, ldflags, opt)
     end
   end
   file(sufs(output, opts) => to_lipo) { |t| lipo(t) } unless single
