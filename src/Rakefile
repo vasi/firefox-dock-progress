@@ -1,23 +1,41 @@
 Rake.application.options.threads = `sysctl -n hw.ncpu`.to_i
 
+@sdks = {}
+def findsdk(sdk)
+  return @sdks[sdk] if @sdks.include?(sdk)
+  return @sdks[sdk] = findsdk_i(sdk)
+end
+def findsdk_i(sdk)
+  path = `xcodebuild -version -sdk macosx#{sdk} Path 2>/dev/null`
+  return path.strip if $?.success?
+  
+  file = "MacOSX#{sdk}.sdk"
+  ["/Developer", "/Xcode3"].each do |root|
+    p = File.join(root, 'SDKs', file)
+    return p if File.exist?(p)
+  end
+  nil
+end
+@gcc40 = nil
+def gcc40
+  @gcc40 = begin; `gcc-4.0 -v 2>/dev/null`; $?.success?; end if @gcc40.nil?
+  @gcc40
+end
+def prelion; gcc40 && findsdk('10.4u'); end
+
 # Decide what SDKs we want for each arch
 def native_arch; @native ||= `arch`.chomp; end
-def archsdkid(a); a == 'x86_64' ? '10.6' : '10.4u'; end
-
-# Utilities for arch flags
-@archs = {}
-def archsdk(a)
-  @archs[a] ||= begin
-    i = archsdkid(a)
-    (i >= "10.6") ? `xcodebuild -version -sdk macosx#{i} Path`.strip :
-      "/Xcode3/SDKs/MacOSX#{archsdkid(a)}.sdk"
-  end
+def archsdkid(a)
+  return '10.4u' if a != 'x86_64' && prelion
+  return '10.6'
 end
+
+def archsdk(a); findsdk(archsdkid(a)); end
 def archtarg(a)
   "-mmacosx-version-min=#{archsdkid(a).match(/\d\d\.\d/)[0]}"
 end
 def archcc(a)
-  compiler = (a == 'x86_64') ? 'clang' : 'gcc-4.0'
+  compiler = (a != 'x86_64' && prelion) ? 'gcc-4.0' : 'clang'
   [compiler, '-arch', a, archtarg(a), '-Wall']
 end
 # Allow flags to expand to include arch-dependent data
@@ -60,6 +78,7 @@ def universal(opts)
   
   to_lipo = []
   opts[:arch].each do |arch|
+    next if arch == 'ppc' && !prelion
     to_link = []
     to_compile.each do |src|
       to_link << sufs(sufa(subext(src, '.o'), arch), opts)
@@ -117,5 +136,5 @@ end
 
 
 require 'rake/clean'
-CLEAN.include('IDockProgress.h', '*.xpt', '*.o', '*.so', '*.dylib')
+CLEAN.include('*.o', '*.so', '*.dylib')
 task :default => :release
