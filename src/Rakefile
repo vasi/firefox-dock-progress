@@ -31,7 +31,7 @@ def compile(target, cc, arch, xflags, strflags)
     ['-isysroot', archsdk(arch), '-c', '-o', target.name,
       target.prerequisites.first])
 end
-def link(target, cc, arch, xflags, strflags)
+def xlink(target, cc, arch, xflags, strflags)
   sh *(archcc(cc, arch) + archxflags(xflags, arch) + strflags +
     ["-Wl,-syslibroot,#{archsdk(arch)}", '-o', target.name] +
     target.prerequisites)
@@ -72,7 +72,7 @@ def universal(opts)
     
     to_lipo << sufs(single ? output : sufa(output, arch), opts)
     file to_lipo.last => (to_link + link_add) do |t|
-      link(t, ccbase, arch, ldflags, opt)
+      xlink(t, ccbase, arch, ldflags, opt)
     end
   end
   file(sufs(output, opts) => to_lipo) { |t| lipo(t) } unless single
