@@ -1,8 +1,7 @@
 content	dockprogress chrome/content/
 interfaces components/DockProgress.xpt
-component {3146FBBB-CBDF-4A0F-BC00-00CAD2C75E58} components/DockProgress.js appversion>3.*
-contract @vasi.dyndns.org/DockProgress/DockProgress;1 {3146FBBB-CBDF-4A0F-BC00-00CAD2C75E58} appversion>3.*
-binary-component components/DockProgress.dylib appversion<=3.*
+component {3146FBBB-CBDF-4A0F-BC00-00CAD2C75E58} components/DockProgress.js
+contract @vasi.dyndns.org/DockProgress/DockProgress;1 {3146FBBB-CBDF-4A0F-BC00-00CAD2C75E58}
 overlay	chrome://browser/content/browser.xul chrome://dockprogress/content/dockprogress.xul
 locale dockprogress en-US chrome/locale/en-US/
 locale dockprogress fr-FR chrome/locale/fr-FR/

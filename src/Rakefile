@@ -101,33 +101,12 @@ def xpidl(target, mode)
     '-m', mode,
     '-e', target.name, target.source
 end
-rule('.h' => '.idl') { |t| xpidl(t, 'header') }
 rule('.xpt' => '.idl') { |t| xpidl(t, 'typelib') }
-rule '.xpt' => proc { |t| 'I' + t } do |t|
-  sh xnative('bin/xpt_link'), t.name, t.source
-end
-
 
 # Define how to build our binaries
 COMMON_CFLAGS = %w[-fno-exceptions -fPIC -fno-strict-aliasing
   -fpascal-strings -fno-common -fshort-wchar]  
 
-def xpcom(opts)
-  universal(opts.merge(
-    :output => 'DockProgress.dylib',
-    :input => %w[DockProgress.mm ModuleDockProgress.mm IDockProgress.h
-        DockProgressC.h] +
-      [sufs('DockProgressC.dylib', opts)],
-    :cflags => proc { |a|
-      %w[-DXPCOM_GLUE -DXPCOM_GLUE_USE_NSPR -Wno-non-virtual-dtor -fno-rtti] +
-        COMMON_CFLAGS + ['-I', xsdk(a, 'sdk/include')]
-    },
-    :ldflags => proc { |a|
-      %w[-lxpcomglue_s -lxpcom -lnspr4 -framework Cocoa -bundle] +
-        ["-L#{xsdk(a, 'lib')}",
-        "-Wl,-executable_path,#{xsdk(a, 'bin/xulrunner')}"]
-    }))
-end
 def clib(opts)
   universal(opts.merge(
     :output => 'DockProgressC.dylib',
@@ -141,7 +120,6 @@ end
 STYLES = {}
 def style(name, xpcom_arch, clib_arch, opts)
   STYLES[name] = {
-    :xpcom => xpcom(opts.merge(:arch => xpcom_arch)),
     :clib => clib(opts.merge(:arch => clib_arch)),
   }
   task name => STYLES[name].values.map { |f| sufs(f, opts) } +
@@ -160,7 +138,6 @@ end
 STYLES.each do |n, v|
   task sufs('install', v[:suf]) => n do |t|
     xinstall('DockProgress.xpt', '../components/')
-    xinstall(v[:xpcom], '../components/', v[:suf])
     xinstall(v[:clib], '../chrome/content/', v[:suf])
   end
 end
