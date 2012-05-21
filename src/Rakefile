@@ -106,7 +106,7 @@ end
 
 # Define build styles
 STYLES = {}
-def style(name, xpcom_arch, clib_arch, opts)
+def style(name, clib_arch, opts)
   STYLES[name] = {
     :clib => clib(opts.merge(:arch => clib_arch)),
   }
@@ -114,8 +114,8 @@ def style(name, xpcom_arch, clib_arch, opts)
     %w[DockProgress.xpt]
   STYLES[name][:suf] = opts[:suffix]
 end
-style(:release, %w[ppc i386], %w[ppc i386 x86_64], :opt => %w[-Os])
-style(:debug, [native_arch], [native_arch], :opt => %w[-O0 -g],
+style(:release, %w[ppc i386 x86_64], :opt => %w[-Os])
+style(:debug, [native_arch], :opt => %w[-O0 -g],
   :suffix => '-debug')
 
 
