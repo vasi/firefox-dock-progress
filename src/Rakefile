@@ -11,15 +11,23 @@ Rake.application.options.threads = `sysctl -n hw.ncpu`.to_i
 # Decide what SDKs we want for each arch
 def native_arch; @native ||= `arch`.chomp; end
 def archsdkid(a); a == 'x86_64' ? '10.6' : '10.4u'; end
-def archccvers(a); (a == 'x86_64' ? '4.2' : '4.0'); end
 
 # Utilities for arch flags
-def archsdk(a); "/Developer/SDKs/MacOSX#{archsdkid(a)}.sdk"; end
+def archsdk(a)
+  i = archsdkid(a)
+  if i >= "10.6"
+    return `xcodebuild -version -sdk macosx#{i} Path`.strip
+  else
+    return "/Xcode3/SDKs/MacOSX#{archsdkid(a)}.sdk"
+  end
+end
 def archtarg(a)
   "-mmacosx-version-min=#{archsdkid(a).match(/\d\d\.\d/)[0]}"
 end
 def archcc(cc, a)
-  [cc + '-' + archccvers(a), '-arch', a, archtarg(a), '-Wall']
+  clang = (cc == 'g++') ? 'clang++' : 'clang'
+  compiler = (a == 'x86_64') ? clang : "#{cc}-4.0"
+  [compiler, '-arch', a, archtarg(a), '-Wall']
 end
 # Allow flags to expand to include arch-dependent data
 def archxflags(x, a); x.respond_to?(:to_proc) ? x[a] : x; end
