@@ -30,8 +30,10 @@ void FDPSetStyle(FDPStyle style) {
 }
 
 void FDPSetGradientPath(const char *path) {
-	NSString *imgPath = [NSString stringWithUTF8String: path];
-	gFDPGradient = [[NSImage alloc] initByReferencingFile: imgPath];
+	if (gFDPGradient == NULL) {
+		NSString *imgPath = [NSString stringWithUTF8String: path];
+		gFDPGradient = [[NSImage alloc] initByReferencingFile: imgPath];
+	}
 }
 
 static void FDPUpdate(bool show, double progress) {
@@ -49,6 +51,7 @@ static void FDPUpdate(bool show, double progress) {
 	}
 	// Use NSDockTile instead?
 	[NSApp setApplicationIconImage: dockIcon];
+	[dockIcon release];
 }
 
 static void FDPDrawBar(NSImage *icon, double progress) {
