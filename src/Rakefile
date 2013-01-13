@@ -24,7 +24,7 @@ end
 def prelion; gcc40 && findsdk('10.4u'); end
 
 # Decide what SDKs we want for each arch
-def native_arch; @native ||= `arch`.chomp; end
+def native_arch; @native ||= `echo $HOSTTYPE`.chomp; end
 def archsdkid(a)
   return '10.4u' if a != 'x86_64' && prelion
   return '10.6'
